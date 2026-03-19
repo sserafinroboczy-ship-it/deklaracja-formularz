@@ -97,7 +97,7 @@
 
     <script>
         // Google Apps Script URL - UZUPEŁNIJ PO UTWORZENIU SKRYPTU
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwHMj7tTYePECwP9Y5UvhspYxIN-Y1BEE7Cd1L1K56W2oaaONLDmodduwFkOtbHzd3J/exec';
+        const API_URL = 'https://regnal-unwhisked-bryce.ngrok-free.dev/api/public/declaration';
 
         // Polish holidays (fixed dates)
         const HOLIDAYS_2024 = {
@@ -232,15 +232,21 @@
             submitBtn.textContent = '⏳ Wysyłanie...';
             
             try {
-                // Send to Google Sheets
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                // Send to local server via ngrok
+                const response = await fetch(API_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
                     body: JSON.stringify(data)
                 });
                 
-                // Show success (no-cors doesn't return response)
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error || 'Błąd serwera');
+                }
+                
                 form.classList.add('hidden');
                 successMessage.classList.remove('hidden');
                 
